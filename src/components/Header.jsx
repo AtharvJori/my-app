@@ -1,21 +1,14 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, X, Search, Film } from "lucide-react";
+import { Search, Film } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 const Header = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
   const navItems = [
     { name: "Home", href: "/" },
     { name: "Movies", href: "/movies" },
     { name: "TV Shows", href: "/tv-shows" },
     { name: "Favourites", href: "/favourites" },
+    { name: "About", href: "/about" },
   ];
 
   return (
@@ -37,8 +30,8 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden lg:flex flex-1 max-w-xl mx-8">
+          {/* Search Bar - Desktop & Tablet */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -52,7 +45,7 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -65,8 +58,9 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-3 ml-6">
+          {/* Desktop Auth Buttons & Theme Toggle */}
+          <div className="hidden lg:flex items-center space-x-3 ml-6">
+            <ThemeToggle />
             <Link
               href="/signin"
               className="text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/5"
@@ -81,28 +75,27 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
-            {/* Mobile Search Icon */}
-            <button className="p-2 rounded-lg hover:bg-white/10 transition-colors">
-              <Search className="h-5 w-5 text-gray-300" />
-            </button>
-            <button
-              onClick={toggleMobileMenu}
-              className="text-gray-300 hover:text-white focus:outline-none p-2 rounded-lg hover:bg-white/10 transition-all duration-300"
-              aria-label="Toggle mobile menu"
+          {/* Mobile/Tablet - Simple Navigation */}
+          <div className="lg:hidden flex items-center space-x-1">
+            <ThemeToggle />
+            <Link
+              href="/search"
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label="Search"
             >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+              <Search className="h-5 w-5 text-gray-300" />
+            </Link>
+            <Link
+              href="/signin"
+              className="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/5"
+            >
+              Sign In
+            </Link>
           </div>
         </div>
 
         {/* Mobile Search Bar */}
-        <div className="lg:hidden pb-4">
+        <div className="md:hidden pb-4">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -115,39 +108,26 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
-        <div
-          className={`md:hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-          } overflow-hidden`}
-        >
-          <div className="px-2 pt-2 pb-6 space-y-1 bg-gradient-to-b from-gray-800/95 to-gray-900/95 rounded-xl mt-2 backdrop-blur-sm border border-gray-700/50">
+        {/* Mobile Navigation Links - Always Visible */}
+        <div className="lg:hidden pb-4">
+          <nav className="flex flex-wrap gap-2 justify-center">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-300 hover:text-white block px-4 py-3 rounded-lg text-base font-medium transition-all duration-300 hover:bg-white/10 border-l-4 border-transparent hover:border-yellow-400"
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/10 border border-gray-700/30 hover:border-yellow-400/50"
               >
                 {item.name}
               </Link>
             ))}
-            <div className="pt-4 border-t border-gray-700 mt-4 space-y-2">
-              <Link
-                href="/signin"
-                className="text-gray-300 hover:text-white block px-4 py-3 rounded-lg text-base font-medium transition-all duration-300 hover:bg-white/10"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black block px-4 py-3 rounded-lg text-base font-bold transition-all duration-300 text-center shadow-lg"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Join IMDb
-              </Link>
-            </div>
+          </nav>
+          <div className="flex justify-center mt-3">
+            <Link
+              href="/signup"
+              className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 shadow-lg"
+            >
+              Join IMDb
+            </Link>
           </div>
         </div>
       </div>
