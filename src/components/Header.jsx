@@ -1,8 +1,13 @@
+"use client";
 import Link from "next/link";
 import { Search, Film } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import ClerkAuthButtons from "./ClerkAuthButtons";
+import { useAuth } from "@clerk/nextjs";
 
 const Header = () => {
+  const { isSignedIn } = useAuth();
+
   const navItems = [
     { name: "Home", href: "/" },
     { name: "Movies", href: "/movies" },
@@ -46,50 +51,36 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="relative text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/5 group"
-              >
-                {item.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-400 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            ))}
+            {navItems
+              .filter((item) => item.name !== "Favourites" || isSignedIn)
+              .map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="relative text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/5 group"
+                >
+                  {item.name}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-400 transition-all duration-300 group-hover:w-full"></span>
+                </Link>
+              ))}
           </nav>
 
           {/* Desktop Auth Buttons & Theme Toggle */}
           <div className="hidden lg:flex items-center space-x-3 ml-6">
             <ThemeToggle />
-            <Link
-              href="/signin"
-              className="text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/5"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-500/25"
-            >
-              Join IMDb
-            </Link>
+            <ClerkAuthButtons />
           </div>
 
           {/* Mobile/Tablet - Simple Navigation */}
           <div className="lg:hidden flex items-center space-x-1">
             <ThemeToggle />
+            <ClerkAuthButtons />
             <Link
               href="/search"
               className="p-2 rounded-lg hover:bg-white/10 transition-colors"
               aria-label="Search"
             >
               <Search className="h-5 w-5 text-gray-300" />
-            </Link>
-            <Link
-              href="/signin"
-              className="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/5"
-            >
-              Sign In
             </Link>
           </div>
         </div>
@@ -111,15 +102,17 @@ const Header = () => {
         {/* Mobile Navigation Links - Always Visible */}
         <div className="lg:hidden pb-4">
           <nav className="flex flex-wrap gap-2 justify-center">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/10 border border-gray-700/30 hover:border-yellow-400/50"
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navItems
+              .filter((item) => item.name !== "Favourites" || isSignedIn)
+              .map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/10 border border-gray-700/30 hover:border-yellow-400/50"
+                >
+                  {item.name}
+                </Link>
+              ))}
           </nav>
           <div className="flex justify-center mt-3">
             <Link
