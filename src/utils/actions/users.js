@@ -1,17 +1,6 @@
-// utils/user.actions.js
-import { dbConnect } from "../mongodb/mongoose"; // Your DB connection file
-import User from "../models/user.model"; // Your User model/schema
+import User from "@/models/user.model";
+import { connectToDB } from "@/lib/mongodb/connection";
 
-/**
- * Creates or updates a user in MongoDB based on Clerk webhook data
- * @param {Object} userData - Clerk user data
- * @param {string} userData.id - Clerk user ID
- * @param {string} userData.first_name - User's first name
- * @param {string} userData.last_name - User's last name
- * @param {string} userData.image_url - Profile picture URL
- * @param {Array} userData.email_addresses - Array of email addresses
- * @returns {Promise<Object>} The created/updated user document
- */
 export const createOrUpdateUser = async ({
   id,
   first_name,
@@ -20,63 +9,59 @@ export const createOrUpdateUser = async ({
   email_addresses,
 }) => {
   try {
-    await dbConnect(); // Ensure DB connection
+    await connectToDB();
+
+    // Find primary email
+    const primaryEmail =
+      email_addresses.find(
+        (email) => email.id === evt.data.primary_email_address_id
+      )?.email_address || email_addresses[0]?.email_address;
+
+    const userData = {
+      clerkId: id,
+      firstName: first_name,
+      lastName: last_name,
+      email: primaryEmail,
+      profilePicture: image_url,
+      updatedAt: new Date(),
+    };
+
+    const options = {
+      upsert: true,
+      new: true,
+      runValidators: true,
+      setDefaultsOnInsert: true,
+    };
 
     const user = await User.findOneAndUpdate(
       { clerkId: id },
       {
-        $set: {
-          firstName: first_name,
-          lastName: last_name,
-          profilePicture: image_url,
-          email: email_addresses[0].email_address,
-          updatedAt: new Date(),
-        },
+        $set: userData,
         $setOnInsert: {
-          clerkId: id,
           favorites: [],
           watchlist: [],
-          createdAt: new Date(),
           isActive: true,
+          createdAt: new Date(),
         },
       },
-      {
-        upsert: true, // Create if doesn't exist
-        new: true, // Return the updated document
-        runValidators: true, // Validate the update
-      }
+      options
     );
 
+    console.log(`User ${user.clerkId} saved to database`);
     return user;
   } catch (error) {
-    console.error("Error creating/updating user:", error);
-    throw new Error("Failed to create/update user");
+    console.error("Error saving user to database:", error);
+    throw error;
   }
 };
 
-/**
- * Deletes a user by setting isActive to false (soft delete)
- * @param {string} clerkId - Clerk user ID
- * @returns {Promise<Object>} The updated user document
- */
-export const deleteUser = async (clerkId) => {
+export const getUserById = async (clerkId) => {
   try {
     await connectToDB();
-
-    const user = await User.findOneAndUpdate(
-      { clerkId },
-      {
-        $set: {
-          isActive: false,
-          updatedAt: new Date(),
-        },
-      },
-      { new: true }
-    );
-
+    const user = await User.findOne({ clerkId });
     return user;
   } catch (error) {
-    console.error("Error deleting user:", error);
-    throw new Error("Failed to delete user");
+    console.error("Error fetching user:", error);
+    throw error;
   }
 };
