@@ -1,75 +1,56 @@
-const mongoose = require('mongoose');
-
-const favoriteSchema = new mongoose.Schema({
-    // Reference to the user who favorited the movie
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-  
-    // Movie details
-    movieId: {
-        type: String,
-        required: true,
-        index: true
-    },
-  
-    title: {
-        type: String,
-        required: true
-    },
-  
-    releaseDate: {
-        type: Date,
-        required: true
-    },
-  
-    description: {
-        type: String,
-        required: true
-    },
-  
-    // Image URLs
-    image: {
-        poster: String,
-        backdrop: String,
-        logo: String
-    }
-});
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    // Clerk authentication ID
-    clerkId: {
-        type: String,
-        required: true,
-        unique: true
-    },
-  
-    // Personal information
-    firstName: {
-        type: String,
-        required: true
-    },
-    lastName: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        match: [/.+\@.+\..+/, 'Please enter a valid email']
-    },
-    profilePicture: {
-        type: String,
-        default: ''
-    },
-    favs: {
-        type=[favoriteSchema],
-        default: []
-    }
+  clerkId: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true,
+  },
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    match: [/.+\@.+\..+/, "Please enter a valid email"],
+  },
+  profilePicture: {
+    type: String,
+    default: "",
+  },
+  favorites: {
+    type: Array,
+    default: [],
+  },
+  watchlist: {
+    type: Array,
+    default: [],
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-const User = mongoose.models.User || mongoose.model('User', userSchema);
-export default User;
+// Update timestamp before saving
+userSchema.pre("save", function (next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+export const User = mongoose.models.User || mongoose.model("User", userSchema);

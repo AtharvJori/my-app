@@ -1,7 +1,7 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextResponse } from "next/server";
-import { createOrUpdateUser, deleteUser } from "@/lib/actions/user.actions";
-import { connectToDB } from "@/lib/mongodb/connection";
+import { createOrUpdateUser, deleteUser } from "../utils/actions/user";
+import { connectToDB } from "../utils/mongodb/mongoose";
 
 export async function POST(request) {
   try {
