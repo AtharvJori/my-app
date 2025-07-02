@@ -1,20 +1,52 @@
 import { verifyWebhook } from '@clerk/nextjs/webhooks'
-import { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { createOrUpdateUser, deleteUser } from '@/utils/user.actions'
 
 export async function POST(req) {
   try {
     const evt = await verifyWebhook(req)
-
-    // Do something with payload
-    // For this guide, log payload to console
-    const { id } = evt.data
+    const { id, first_name, last_name, image_url, email_addresses } = evt.data
     const eventType = evt.type
-    console.log(`Received webhook with ID ${id} and event type of ${eventType}`)
-    console.log('Webhook payload:', evt.data)
 
-    return new Response('Webhook received', { status: 200 })
+    console.log(`Processing webhook: ${eventType} for user ${id}`)
+
+    switch (eventType) {
+      case 'user.created':
+      case 'user.updated':
+        // Create or update user in MongoDB
+        const user = await createOrUpdateUser({
+          id,
+          first_name,
+          last_name,
+          image_url,
+          email_addresses
+        })
+        console.log(`User ${user.clerkId} ${eventType} successfully`)
+        break
+
+      case 'user.deleted':
+        // Soft delete user in MongoDB
+        const deletedUser = await deleteUser(id)
+        console.log(`User ${deletedUser.clerkId} marked as inactive`)
+        break
+
+      default:
+        console.warn(`Unhandled event type: ${eventType}`)
+        return NextResponse.json(
+          { message: 'Unhandled event type' },
+          { status: 200 }
+        )
+    }
+
+    return NextResponse.json(
+      { message: 'Webhook processed successfully' },
+      { status: 200 }
+    )
   } catch (err) {
-    console.error('Error verifying webhook:', err)
-    return new Response('Error verifying webhook', { status: 400 })
+    console.error('Error processing webhook:', err)
+    return NextResponse.json(
+      { error: 'Error processing webhook' },
+      { status: 400 }
+    )
   }
 }
